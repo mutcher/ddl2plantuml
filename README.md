@@ -5,6 +5,7 @@ ddl2plantuml is a tool to generate plantuml ER diagram from database ddl.
 ### Supported database
 
 - [x] mysql
+- [] oracle
 
 ### Quick start
 

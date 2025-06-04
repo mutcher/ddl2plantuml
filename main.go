@@ -30,7 +30,7 @@ func main() {
 			Name:    "driver",
 			Aliases: []string{"d"},
 			Usage:   "database driver",
-			Value:   "mysql",
+			Value:   "mysql, oracle",
 		},
 		&cli.StringFlag{
 			Name:    "template",
@@ -61,6 +61,8 @@ func action(c *cli.Context) error {
 	switch strings.ToLower(c.String("driver")) {
 	case "mysql":
 		d = &driver.Mysql{}
+	case "oracle":
+		d = &driver.Oracle{}
 	default:
 		return cli.Exit("unsupported driver", 1)
 	}
