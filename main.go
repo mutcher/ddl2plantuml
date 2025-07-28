@@ -12,6 +12,8 @@ import (
 
 	"github.com/icpd/ddl2plantuml/constants"
 	"github.com/icpd/ddl2plantuml/driver"
+	"github.com/icpd/ddl2plantuml/driver/common"
+	"github.com/icpd/ddl2plantuml/driver/oracle"
 	"github.com/urfave/cli/v2"
 )
 
@@ -57,12 +59,12 @@ func main() {
 }
 
 func action(c *cli.Context) error {
-	var d driver.Driver
+	var d common.Driver
 	switch strings.ToLower(c.String("driver")) {
 	case "mysql":
 		d = &driver.Mysql{}
 	case "oracle":
-		d = &driver.Oracle{}
+		d = &oracle.Oracle{}
 	default:
 		return cli.Exit("unsupported driver", 1)
 	}
@@ -103,8 +105,8 @@ func action(c *cli.Context) error {
 }
 
 type tmplData struct {
-	Tables       []driver.Table
-	Relationship []driver.Relation
+	Tables       []common.Table
+	Relationship []common.Relation
 }
 
 func (t tmplData) generate(tpl *template.Template, outputFile string) error {

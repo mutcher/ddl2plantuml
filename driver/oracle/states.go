@@ -1,22 +1,16 @@
-package driver
+package oracle
 
 import (
 	"fmt"
 	"slices"
+
+	"github.com/icpd/ddl2plantuml/driver/common"
 )
 
-const (
-	CreateWord       = "CREATE"
-	CommentWord      = "COMMENT"
-	ColumnWord       = "COLUMN"
-	TableWord        = "TABLE"
-	OnWord           = "ON"
-	IsWord           = "IS"
-	OpenBracketWord  = "("
-	CloseBracketWord = ")"
-	ComaWord         = ","
-	SemicolonWord    = ";"
-)
+type MutableState interface {
+	GetTables() *common.Tables
+	InjectWord(word string) (MutableState, error)
+}
 
 type UnexpectedWordError struct {
 	UnexpectedWord string
@@ -27,11 +21,6 @@ func (e UnexpectedWordError) Error() string {
 	return fmt.Sprintf("Unexpected word in sequence %s prev word: %s", e.UnexpectedWord, e.PreviousWord)
 }
 
-type MutableState interface {
-	GetTables() *Tables
-	InjectWord(word string) (MutableState, error)
-}
-
 // CreateTableColumnsDefinitionSubState
 const (
 	COLUMN_NAME_STEP = iota
@@ -39,13 +28,13 @@ const (
 )
 
 type CreateTableColumnsDefinitionState struct {
-	Table     *Table
-	TmpColumn Column
+	Table     *common.Table
+	TmpColumn common.Column
 	Step      int
 }
 
 // GetTables implements MutableState.
-func (s *CreateTableColumnsDefinitionState) GetTables() *Tables {
+func (s *CreateTableColumnsDefinitionState) GetTables() *common.Tables {
 	panic("unimplemented")
 }
 
@@ -84,15 +73,15 @@ const (
 )
 
 type NullState struct {
-	Tables *Tables
+	Tables *common.Tables
 }
 
 // GetTables implements MutableState.
-func (s *NullState) GetTables() *Tables {
+func (s *NullState) GetTables() *common.Tables {
 	return s.Tables
 }
 
-func NullStateInit(tables *Tables) NullState {
+func NullStateInit(tables *common.Tables) NullState {
 	return NullState{Tables: tables}
 }
 
@@ -105,23 +94,23 @@ func (s *NullState) InjectWord(word string) (MutableState, error) {
 }
 
 type CommentState struct {
-	Tables     *Tables
+	Tables     *common.Tables
 	EntityName string
 	Step       int
 }
 
 // GetTables implements MutableState.
-func (s *CommentState) GetTables() *Tables {
+func (s *CommentState) GetTables() *common.Tables {
 	return s.Tables
 }
 
-func ComentStateInit(tables *Tables) CommentState {
+func ComentStateInit(tables *common.Tables) CommentState {
 	return CommentState{Tables: tables, EntityName: "", Step: COMMENT_STATE_STEP_ON}
 }
 
 func (s *CommentState) InjectWord(word string) (MutableState, error) {
 	if s.Step == COMMENT_STATE_STEP_TABLE_COMMENT {
-		idx := slices.IndexFunc(*s.Tables, func(t Table) bool {
+		idx := slices.IndexFunc(*s.Tables, func(t common.Table) bool {
 			return t.Name == s.EntityName
 		})
 		if idx == -1 {
@@ -160,20 +149,20 @@ func (s *CommentState) InjectWord(word string) (MutableState, error) {
 // CreateTableState
 
 type CreateTableState struct {
-	Tables   *Tables
-	TmpTable Table
+	Tables   *common.Tables
+	TmpTable common.Table
 	LastWord string
 
 	SubState MutableState
 }
 
 // GetTables implements MutableState.
-func (s *CreateTableState) GetTables() *Tables {
+func (s *CreateTableState) GetTables() *common.Tables {
 	return s.Tables
 }
 
-func CreateTableStateInit(tables *Tables) CreateTableState {
-	return CreateTableState{Tables: tables, TmpTable: Table{}, LastWord: CreateWord, SubState: nil}
+func CreateTableStateInit(tables *common.Tables) CreateTableState {
+	return CreateTableState{Tables: tables, TmpTable: common.Table{}, LastWord: CreateWord, SubState: nil}
 }
 
 func (s *CreateTableState) InjectWord(word string) (MutableState, error) {
@@ -214,11 +203,11 @@ func (s *CreateTableState) InjectWord(word string) (MutableState, error) {
 // NoneState
 
 type NoneState struct {
-	Tables *Tables
+	Tables *common.Tables
 }
 
 // GetTables implements MutableState.
-func (s *NoneState) GetTables() *Tables {
+func (s *NoneState) GetTables() *common.Tables {
 	return s.Tables
 }
 
@@ -234,31 +223,4 @@ func (s *NoneState) InjectWord(word string) (MutableState, error) {
 	}
 
 	return s, nil
-}
-
-// SqlStateHandlerImpl
-
-type SqlStateHandlerImpl struct {
-	Tables       *Tables
-	CurrentState MutableState
-}
-
-// GetTables implements SqlStateHandler.
-func (s *SqlStateHandlerImpl) GetTables() *Tables {
-	return s.CurrentState.GetTables()
-}
-
-func (s *SqlStateHandlerImpl) Reset() {
-	s.Tables = &Tables{}
-	s.CurrentState = &NoneState{s.Tables}
-}
-
-func (s *SqlStateHandlerImpl) InjectWord(word string) error {
-	state, err := s.CurrentState.InjectWord(word)
-	if err != nil {
-		return err
-	}
-
-	s.CurrentState = state
-	return nil
 }

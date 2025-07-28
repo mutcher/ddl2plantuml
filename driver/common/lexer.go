@@ -1,4 +1,4 @@
-package driver
+package common
 
 type Lexer struct {
 	index int
@@ -10,7 +10,7 @@ func (l *Lexer) Reset(ddl *string) {
 	l.index = 0
 }
 
-func (l *Lexer) isValid() bool {
+func (l *Lexer) IsValid() bool {
 	return l.index >= 0 && l.index < len(l.ddl)
 }
 

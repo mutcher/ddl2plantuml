@@ -1,8 +1,9 @@
-package driver
+package oracle
 
 import (
 	"testing"
 
+	"github.com/icpd/ddl2plantuml/driver/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -106,8 +107,8 @@ func TestSqlStateHandlerImpl_CreateMultipleTables_WithComments(t *testing.T) {
 }
 
 func TestCreateTableColumnsDefinitionSubState_ColumnDefinition(t *testing.T) {
-	table := Table{}
-	state := CreateTableColumnsDefinitionState{&table, Column{}, COLUMN_NAME_STEP}
+	table := common.Table{}
+	state := CreateTableColumnsDefinitionState{&table, common.Column{}, COLUMN_NAME_STEP}
 
 	words := []string{"id", "varchar(255)", ","}
 

@@ -1,4 +1,4 @@
-package driver
+package oracle
 
 import (
 	"testing"
@@ -14,7 +14,7 @@ func TestOracle_CreateSingleTableParse(t *testing.T) {
   contact_name varchar2(50),
   CONSTRAINT supplier_pk PRIMARY KEY (supplier_id)
 );
-COMMENT ON TABLE supplier IS "hahahah haha haha";`
+COMMENT ON TABLE supplier IS 'hahahah haha haha';`
 
 	d := &Oracle{}
 	tables, err := d.Parse(ddl)

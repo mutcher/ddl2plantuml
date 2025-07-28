@@ -1,9 +1,11 @@
-package driver
+package oracle
 
 import (
 	"fmt"
 	"slices"
 	"strings"
+
+	"github.com/icpd/ddl2plantuml/driver/common"
 )
 
 const (
@@ -12,7 +14,7 @@ const (
 )
 
 type SqlStateHandler interface {
-	GetTables() *Tables
+	GetTables() *common.Tables
 	InjectWord(word string) error
 }
 
@@ -48,20 +50,20 @@ func isSqlEquals(command string, expected string) bool {
 	return strings.ToUpper(strings.TrimSpace(command)) == expected
 }
 
-func (m *Oracle) Parse(ddl string) (Tables, error) {
+func (m *Oracle) Parse(ddl string) (common.Tables, error) {
 	sqlHandler := new(SqlStateHandlerImpl)
 	sqlHandler.Reset()
 	return m.ParseEx(ddl, sqlHandler)
 }
 
-func (m *Oracle) ParseEx(ddl string, sqlHandler SqlStateHandler) (Tables, error) {
+func (m *Oracle) ParseEx(ddl string, sqlHandler SqlStateHandler) (common.Tables, error) {
 	var wordBuilder strings.Builder
 
 	wordBuilder.Reset()
-	lexer := Lexer{}
+	lexer := common.Lexer{}
 	lexer.Reset(&ddl)
 
-	for lexer.isValid() {
+	for lexer.IsValid() {
 		// skip comments
 		if lexer.Current() == RUNE_FORWARD_SLASH && lexer.PreviewNext() == RUNE_STAR {
 			lexer.Inc() // skipping "star"

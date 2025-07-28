@@ -1,8 +1,9 @@
-package driver
+package oracle
 
 import (
 	"testing"
 
+	"github.com/icpd/ddl2plantuml/driver/common"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,8 +11,8 @@ type SpySqlHandler struct {
 	words []string
 }
 
-func (s *SpySqlHandler) GetTables() *Tables {
-	return &Tables{}
+func (s *SpySqlHandler) GetTables() *common.Tables {
+	return &common.Tables{}
 }
 
 func (s *SpySqlHandler) InjectWord(word string) error {
