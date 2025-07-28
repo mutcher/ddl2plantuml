@@ -11,6 +11,7 @@ const (
 	ColumnWord       = "COLUMN"
 	TableWord        = "TABLE"
 	OnWord           = "ON"
+	IsWord           = "IS"
 	OpenBracketWord  = "("
 	CloseBracketWord = ")"
 	ComaWord         = ","
@@ -129,6 +130,15 @@ func (s *CommentState) InjectWord(word string) (MutableState, error) {
 
 		(*s.Tables)[idx].Comment = word
 		return &NoneState{s.Tables}, nil
+	}
+
+	if s.Step == COMMENT_STATE_STEP_IS && isSqlEquals(word, IsWord) {
+		s.Step = COMMENT_STATE_STEP_TABLE_COMMENT
+	}
+
+	if s.Step == COMMENT_STATE_STEP_TABLE_NAME {
+		s.Step = COMMENT_STATE_STEP_IS
+		s.EntityName = word
 	}
 
 	if s.Step == COMMENT_STATE_STEP_COLUMN_OR_TABLE && isSqlEquals(word, TableWord) {

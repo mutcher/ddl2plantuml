@@ -31,26 +31,14 @@ func TestOracle_CommentParse(t *testing.T) {
 	ddl := `CREATE TABLE something.something (
 		id varchar(255)
 	);
-	COMMENT ON TABLE something.something IS "Ahaha its a super coment";`
-
-	ddl = `COMMENT ON TABLE something.something IS "Ahaha its a super coment";
-
-
-
-	COMMENT ON COLUMN somethig.something.something IS "Ahaha its a super coment";`
+	COMMENT ON TABLE something.something IS 'Ahaha its a super coment';`
 
 	d := &Oracle{}
 	d.Parse(ddl)
-	//tables, err := d.Parse(ddl)
-	// assert.Nil(t, err)
-	// assert.Equal(t, 1, len(tables))
-	// assert.Equal(t, 2, len(tables[0].Columns))
-	// assert.Equal(t, "user", tables[0].Name)
-	// assert.Equal(t, `用户表`, tables[0].Comment)
-	// assert.Equal(t, "id", tables[0].Columns[0].Name)
-	// assert.Empty(t, tables[0].Columns[0].Comment)
-	// assert.True(t, tables[0].Columns[0].IsPrimaryKey)
-	// assert.Equal(t, "name", tables[0].Columns[1].Name)
-	// assert.Equal(t, `"名称"`, tables[0].Columns[1].Comment)
-	// assert.False(t, tables[0].Columns[1].IsPrimaryKey)
+	tables, err := d.Parse(ddl)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(tables))
+	assert.Equal(t, 1, len(tables[0].Columns))
+	assert.Equal(t, "something.something", tables[0].Name)
+	assert.Equal(t, "Ahaha its a super coment", tables[0].Comment)
 }

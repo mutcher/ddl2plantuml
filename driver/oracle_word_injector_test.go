@@ -55,7 +55,7 @@ func TestSqlStateHandlerImpl_CreateSimpleTable_SkipCommandsExceptCreateaAncComme
 }
 
 func TestSqlStateHandlerImpl_CreateSimpleTable_ThrowsErrorWithIncorrectSyntax(t *testing.T) {
-	words := []string{"CREATE", "IS", "TABLE", "suppa_table", "(", "id", "varchar(255)", ")", ";"}
+	words := []string{"CREATE", "IS", "TABLE", "suppa_table", "(", "id", "varchar(", "255", ")", ")", ";"}
 	wordsProcessor := SqlStateHandlerImpl{}
 	wordsProcessor.Reset()
 
