@@ -7,7 +7,7 @@ import (
 )
 
 func TestSqlStateHandlerImpl_CreateSimpleTable_NoComments(t *testing.T) {
-	words := []string{"CREATE", "TABLE", "suppa_table", "(", "id", "varchar(255)", ")", ";"}
+	words := []string{"CREATE", "TABLE", "suppa_table", "(", "id", "varchar", "(", "255", ")", ")", ";"}
 	wordsProcessor := SqlStateHandlerImpl{}
 	wordsProcessor.Reset()
 
@@ -31,7 +31,7 @@ func TestSqlStateHandlerImpl_CreateSimpleTable_NoComments(t *testing.T) {
 }
 
 func TestSqlStateHandlerImpl_CreateSimpleTable_SkipCommandsExceptCreateaAncComment(t *testing.T) {
-	words := []string{"CREATE", "TABLE", "suppa_table", "(", "id", "varchar(255)", ")", ";"}
+	words := []string{"CREATE", "TABLE", "suppa_table", "(", "id", "varchar", "(", "255", ")", ")", ";"}
 	wordsProcessor := SqlStateHandlerImpl{}
 	wordsProcessor.Reset()
 
@@ -74,7 +74,7 @@ func TestSqlStateHandlerImpl_CreateSimpleTable_ThrowsErrorWithIncorrectSyntax(t 
 
 func TestSqlStateHandlerImpl_CreateSimpleTable_WithComments(t *testing.T) {
 	words := []string{
-		"CREATE", "TABLE", "suppa_table", "(", "id", "varchar(255)", ")", ";",
+		"CREATE", "TABLE", "suppa_table", "(", "id", "varchar", "(", "255", ")", ")", ";",
 		"COMMENT", "ON", "TABLE", "suppa_table", "IS", "this is potuzhyi comment", ";",
 	}
 	wordsProcessor := SqlStateHandlerImpl{}
@@ -107,7 +107,7 @@ func TestSqlStateHandlerImpl_CreateMultipleTables_WithComments(t *testing.T) {
 
 func TestCreateTableColumnsDefinitionSubState_ColumnDefinition(t *testing.T) {
 	table := Table{}
-	state := CreateTableColumnsDefinitionSubState{&table, Column{}, COLUMN_NAME_STEP}
+	state := CreateTableColumnsDefinitionState{&table, Column{}, COLUMN_NAME_STEP}
 
 	words := []string{"id", "varchar(255)", ","}
 

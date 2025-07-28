@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+const (
+	RUNE_FORWARD_SLASH = '/'
+	RUNE_STAR          = '*'
+)
+
 type SqlStateHandler interface {
 	GetTables() *Tables
 	InjectWord(word string) error
@@ -58,11 +63,11 @@ func (m *Oracle) ParseEx(ddl string, sqlHandler SqlStateHandler) (Tables, error)
 
 	for lexer.isValid() {
 		// skip comments
-		if lexer.Current() == '/' && lexer.PreviewNext() == '*' {
+		if lexer.Current() == RUNE_FORWARD_SLASH && lexer.PreviewNext() == RUNE_STAR {
 			lexer.Inc() // skipping "star"
 			for {
 				lexer.Inc()
-				if lexer.Current() == '*' && lexer.Next() == '/' {
+				if lexer.Current() == RUNE_STAR && lexer.Next() == RUNE_FORWARD_SLASH {
 					break
 				}
 			}

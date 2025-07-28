@@ -37,30 +37,35 @@ const (
 	COLUMN_TYPE_STEP
 )
 
-type CreateTableColumnsDefinitionSubState struct {
+type CreateTableColumnsDefinitionState struct {
 	Table     *Table
 	TmpColumn Column
 	Step      int
 }
 
 // GetTables implements MutableState.
-func (s *CreateTableColumnsDefinitionSubState) GetTables() *Tables {
+func (s *CreateTableColumnsDefinitionState) GetTables() *Tables {
 	panic("unimplemented")
 }
 
-func (s *CreateTableColumnsDefinitionSubState) InjectWord(word string) (MutableState, error) {
-	if s.Step == COLUMN_TYPE_STEP && !isSqlEquals(word, ComaWord) {
-		s.TmpColumn.Type += word
+func (s *CreateTableColumnsDefinitionState) InjectWord(word string) (MutableState, error) {
+	if s.Step == COLUMN_TYPE_STEP && (isSqlEquals(word, ComaWord) || isSqlEquals(word, CloseBracketWord)) {
+		if isSqlEquals(word, CloseBracketWord) {
+			s.TmpColumn.Type += word
+		}
+		s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+		return nil, nil
 	}
 
 	if s.Step == COLUMN_NAME_STEP {
 		s.TmpColumn.Name = word
 		s.Step = COLUMN_TYPE_STEP
+		return s, nil
 	}
 
-	if s.Step == COLUMN_TYPE_STEP && isSqlEquals(word, ComaWord) {
-		s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
-		return nil, nil
+	if s.Step == COLUMN_TYPE_STEP && !isSqlEquals(word, ComaWord) {
+		s.TmpColumn.Type += word
+		return s, nil
 	}
 
 	return s, nil
@@ -182,7 +187,7 @@ func (s *CreateTableState) InjectWord(word string) (MutableState, error) {
 
 	// CREATE TABLE name (<...>)
 	if s.LastWord == s.TmpTable.Name && isSqlEquals(word, OpenBracketWord) {
-		s.SubState = &CreateTableColumnsDefinitionSubState{Table: &s.TmpTable, Step: COLUMN_NAME_STEP}
+		s.SubState = &CreateTableColumnsDefinitionState{Table: &s.TmpTable, Step: COLUMN_NAME_STEP}
 	}
 
 	// CREATE TABLE (...)<;>
