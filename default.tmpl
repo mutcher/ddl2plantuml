@@ -19,9 +19,9 @@ hide stereotypes
 table( {{ .Name }}, {{ .Name }}{{ if .Comment }}\n({{ .Comment }}) {{- end }} ) {
     {{- range .Columns }}
     {{- if .IsPrimaryKey }}
-    primary_key( {{ .Name }} ): type( {{ .Type }} ) {{ if .Comment }} comment( {{ .Comment }} ) {{ end }}
+    primary_key("{{ .Name }}"): type("{{ .Type }}") {{ if .Comment }} comment(\"{{ .Comment }}\") {{ end }}
     {{- else }}
-    column( {{ .Name }} ): type( {{ .Type }} ) {{ if .Comment }} comment( {{ .Comment }} ) {{ end }}
+    column("{{ .Name }}"): type("{{ .Type }}") {{ if .Comment }} comment(\"{{ .Comment }}\") {{ end }}
     {{- end }}
     {{- end }}
 }

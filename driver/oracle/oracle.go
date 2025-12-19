@@ -25,6 +25,12 @@ type Oracle struct {
 // https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/CREATE-TABLE.html
 // https://docs.oracle.com/en/database/oracle/oracle-database/23/sqlrf/COMMENT.html
 
+type ColumnNotFoundError string
+
+func (e ColumnNotFoundError) Error() string {
+	return fmt.Sprintf("Column not found: %s", string(e))
+}
+
 type TableNotFoundError string
 
 func (e TableNotFoundError) Error() string {
