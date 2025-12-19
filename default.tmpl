@@ -7,7 +7,7 @@ skinparam class {
 
 !define primary_key(x) <b><color:#0fbebe><&key></color> x</b>
 !define foreign_key(x) <color:#aaaaaa><&key></color> x
-!define column(x) <color:#bdc3c7><&media-record></color> x
+!define column(x) {field} <color:#bdc3c7><&media-record></color> x
 !define table(name, desc) class name as "desc" << (T,#aafdcf) >>
 !define comment(x) <color:#1b1cbf>x</color>
 !define type(x) <color:#fa5410>x</color>
@@ -19,9 +19,9 @@ hide stereotypes
 table( {{ .Name }}, {{ .Name }}{{ if .Comment }}\n({{ .Comment }}) {{- end }} ) {
     {{- range .Columns }}
     {{- if .IsPrimaryKey }}
-    primary_key("{{ .Name }}"): type("{{ .Type }}") {{ if .Comment }} comment(\"{{ .Comment }}\") {{ end }}
+    primary_key("{{ .Name }}"): type("{{ .Type }}") {{ if .Comment }} comment( {{ .Comment }} ) {{ end }}
     {{- else }}
-    column("{{ .Name }}"): type("{{ .Type }}") {{ if .Comment }} comment(\"{{ .Comment }}\") {{ end }}
+    column("{{ .Name }}"): type("{{ .Type }}") {{ if .Comment }} comment( {{ .Comment }} ) {{ end }}
     {{- end }}
     {{- end }}
 }
