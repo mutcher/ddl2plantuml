@@ -77,6 +77,7 @@ func TestSqlStateHandlerImpl_CreateSimpleTable_WithComments(t *testing.T) {
 	words := []string{
 		"CREATE", "TABLE", "suppa_table", "(", "id", "varchar", "(", "255", ")", ")", ";",
 		"COMMENT", "ON", "TABLE", "suppa_table", "IS", "this is potuzhyi comment", ";",
+		"COMMENT", "ON", "COLUMN", "suppa_table.id", "IS", "this is potuzhyi from the column", ";",
 	}
 	wordsProcessor := SqlStateHandlerImpl{}
 	wordsProcessor.Reset()
@@ -95,9 +96,11 @@ func TestSqlStateHandlerImpl_CreateSimpleTable_WithComments(t *testing.T) {
 	assert.Equal(t, 1, len(*tables))
 	tmpTable := (*tables)[0]
 	assert.Equal(t, "suppa_table", tmpTable.Name)
+	assert.Equal(t, "this is potuzhyi comment", tmpTable.Comment)
 	assert.Equal(t, 1, len(tmpTable.Columns))
 	assert.Equal(t, "id", tmpTable.Columns[0].Name)
 	assert.Equal(t, "varchar(255)", tmpTable.Columns[0].Type)
+	assert.Equal(t, "this is potuzhyi from the column", tmpTable.Columns[0].Comment)
 }
 
 func TestSqlStateHandlerImpl_CreateMultipleTables_NoComments(t *testing.T) {

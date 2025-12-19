@@ -42,7 +42,9 @@ func (s *CreateTableColumnsDefinitionState) InjectWord(word string) (MutableStat
 				return s, nil
 			}
 			// closing the column list: finalize column and end substate
-			s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			if s.TmpColumn.Name != "CONSTRAINT" {
+				s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			}
 			return nil, nil
 		}
 
@@ -53,7 +55,9 @@ func (s *CreateTableColumnsDefinitionState) InjectWord(word string) (MutableStat
 				return s, nil
 			}
 			// top-level comma: finalize column and prepare for next
-			s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			if s.TmpColumn.Name != "CONSTRAINT" {
+				s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			}
 			s.TmpColumn = common.Column{} // Reset for next column
 			s.Step = COLUMN_NAME_STEP
 			return s, nil

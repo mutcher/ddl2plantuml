@@ -79,7 +79,8 @@ func TestWordParser_TwoCommandsWithComment(t *testing.T) {
   /*some comment inside*/
   CONSTRAINT supplier_pk PRIMARY KEY (supplier_id)
 );
-COMMENT ON TABLE supplier IS 'hahahah haha haha';`
+COMMENT ON TABLE supplier IS 'hahahah haha haha';
+COMMENT ON COLUMN supplier.supplier_id IS 'this is column comment';`
 	d := &Oracle{}
 	spy := &SpySqlHandler{}
 	d.ParseEx(ddl, spy)
@@ -89,7 +90,8 @@ COMMENT ON TABLE supplier IS 'hahahah haha haha';`
 			"CREATE", "TABLE", "supplier", "(",
 			"supplier_id", "numeric", "(", "10", ")", "not", "null", ",",
 			"CONSTRAINT", "supplier_pk", "PRIMARY", "KEY", "(", "supplier_id", ")", ")", ";",
-			"COMMENT", "ON", "TABLE", "supplier", "IS", "hahahah haha haha", ";"},
+			"COMMENT", "ON", "TABLE", "supplier", "IS", "hahahah haha haha", ";",
+			"COMMENT", "ON", "COLUMN", "supplier.supplier_id", "IS", "this is column comment", ";"},
 		spy.words)
 }
 
