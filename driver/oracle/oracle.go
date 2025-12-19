@@ -65,6 +65,7 @@ func (m *Oracle) ParseEx(ddl string, sqlHandler SqlStateHandler) (common.Tables,
 
 	for lexer.IsValid() {
 		// skip comments
+		// skip block comments /* ... */
 		if lexer.Current() == RUNE_FORWARD_SLASH && lexer.PreviewNext() == RUNE_STAR {
 			lexer.Inc() // skipping "star"
 			for {
@@ -74,6 +75,19 @@ func (m *Oracle) ParseEx(ddl string, sqlHandler SqlStateHandler) (common.Tables,
 				}
 			}
 
+			lexer.Inc()
+			continue
+		}
+
+		// skip single-line comments -- until newline
+		if lexer.Current() == '-' && lexer.PreviewNext() == '-' {
+			// advance until newline or end
+			for lexer.IsValid() {
+				if lexer.Current() == '\n' {
+					break
+				}
+				lexer.Inc()
+			}
 			lexer.Inc()
 			continue
 		}
