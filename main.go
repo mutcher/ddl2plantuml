@@ -2,13 +2,11 @@ package main
 
 import (
 	"embed"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"text/template"
-	"unsafe"
 
 	"github.com/icpd/ddl2plantuml/constants"
 	"github.com/icpd/ddl2plantuml/driver"
@@ -72,20 +70,20 @@ func action(c *cli.Context) error {
 	}
 
 	// get ddl from sql file
-	ddl, err := ioutil.ReadFile(c.String("file"))
+	ddl, err := os.ReadFile(c.String("file"))
 	if err != nil {
 		return cli.Exit(err, 1)
 	}
 
 	// parse ddl
-	tables, err := d.Parse(*(*string)(unsafe.Pointer(&ddl)))
+	tables, err := d.Parse(string(ddl))
 	if err != nil {
 		return cli.Exit(err, 1)
 	}
 	relationship := tables.Relationship()
 
 	// generate plantuml file
-	outputFile := path.Join(c.String("output"), "er.puml")
+	outputFile := filepath.Join(c.String("output"), "er.puml")
 	data := tmplData{
 		Tables:       tables,
 		Relationship: relationship,
@@ -106,7 +104,7 @@ type tmplData struct {
 }
 
 func (t tmplData) generate(tpl *template.Template, outputFile string) error {
-	dir := path.Dir(outputFile)
+	dir := filepath.Dir(outputFile)
 	if !exists(dir) {
 		err := mkDir(dir)
 		if err != nil {
@@ -147,13 +145,12 @@ func getTemplateFile(filepath string) (*template.Template, error) {
 
 func exists(path string) bool {
 	_, err := os.Stat(path)
-	if err != nil {
-		return os.IsExist(err)
+	if err == nil {
+		return true
 	}
-	return true
+	return !os.IsNotExist(err)
 }
 
 func mkDir(path string) error {
-	dir, _ := os.Getwd()
-	return os.MkdirAll(dir+"/"+path, os.ModePerm)
+	return os.MkdirAll(path, os.ModePerm)
 }
