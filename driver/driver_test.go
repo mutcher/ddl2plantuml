@@ -3,21 +3,22 @@ package driver
 import (
 	"testing"
 
+	"github.com/icpd/ddl2plantuml/driver/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestTables_Relationship(t *testing.T) {
 	t.Run("plural", func(t *testing.T) {
-		tables := Tables{
+		tables := common.Tables{
 			{
 				Name:    "users",
 				Comment: "user table",
-				Columns: []Column{{Name: "id"}, {Name: "name"}, {Name: "email"}},
+				Columns: []common.Column{{Name: "id"}, {Name: "name"}, {Name: "email"}},
 			},
 			{
 				Name:    "user_detail",
 				Comment: "user detail table",
-				Columns: []Column{{Name: "id"}, {Name: "user_id"}, {Name: "age"}},
+				Columns: []common.Column{{Name: "id"}, {Name: "user_id"}, {Name: "age"}},
 			},
 		}
 
@@ -30,16 +31,16 @@ func TestTables_Relationship(t *testing.T) {
 	})
 
 	t.Run("singular", func(t *testing.T) {
-		tables := Tables{
+		tables := common.Tables{
 			{
 				Name:    "user",
 				Comment: "user table",
-				Columns: []Column{{Name: "id"}, {Name: "name"}, {Name: "email"}},
+				Columns: []common.Column{{Name: "id"}, {Name: "name"}, {Name: "email"}},
 			},
 			{
 				Name:    "user_detail",
 				Comment: "user detail table",
-				Columns: []Column{{Name: "id"}, {Name: "user_id"}, {Name: "age"}},
+				Columns: []common.Column{{Name: "id"}, {Name: "user_id"}, {Name: "age"}},
 			},
 		}
 

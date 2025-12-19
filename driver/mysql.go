@@ -4,13 +4,14 @@ import (
 	"strings"
 
 	"github.com/blastrain/vitess-sqlparser/sqlparser"
+	"github.com/icpd/ddl2plantuml/driver/common"
 )
 
 type Mysql struct{}
 
-func (m *Mysql) Parse(ddl string) (Tables, error) {
+func (m *Mysql) Parse(ddl string) (common.Tables, error) {
 	tables := strings.Split(ddl, ";")
-	result := make([]Table, 0, len(tables)) // not accurate table count
+	result := make([]common.Table, 0, len(tables)) // not accurate table count
 	for _, ddl := range tables {
 		if strings.TrimSpace(ddl) == "" {
 			continue
@@ -26,9 +27,9 @@ func (m *Mysql) Parse(ddl string) (Tables, error) {
 			continue
 		}
 
-		table := Table{
+		table := common.Table{
 			Name:    createTable.NewName.Name.String(),
-			Columns: make([]Column, 0, len(createTable.Columns)),
+			Columns: make([]common.Column, 0, len(createTable.Columns)),
 		}
 
 		for _, option := range createTable.Options {
@@ -45,7 +46,7 @@ func (m *Mysql) Parse(ddl string) (Tables, error) {
 		}
 
 		for _, column := range createTable.Columns {
-			c := Column{
+			c := common.Column{
 				Name: column.Name,
 				Type: strings.Split(column.Type, "(")[0],
 			}
