@@ -67,3 +67,19 @@ func (s *NoneState) InjectWord(word string) (MutableState, error) {
 
 	return s, nil
 }
+
+// SkipState consumes tokens until the statement terminator (`;`).
+type SkipState struct {
+	Tables *common.Tables
+}
+
+func (s *SkipState) GetTables() *common.Tables {
+	return s.Tables
+}
+
+func (s *SkipState) InjectWord(word string) (MutableState, error) {
+	if isSqlEquals(word, SemicolonWord) {
+		return &NoneState{s.Tables}, nil
+	}
+	return s, nil
+}

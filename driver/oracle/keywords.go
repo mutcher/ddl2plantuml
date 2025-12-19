@@ -5,6 +5,7 @@ const (
 	CommentWord      = "COMMENT"
 	ColumnWord       = "COLUMN"
 	TableWord        = "TABLE"
+	IndexWord        = "INDEX"
 	OnWord           = "ON"
 	IsWord           = "IS"
 	OpenBracketWord  = "("

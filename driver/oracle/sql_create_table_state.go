@@ -1,6 +1,10 @@
 package oracle
 
-import "github.com/icpd/ddl2plantuml/driver/common"
+import (
+	"strings"
+
+	"github.com/icpd/ddl2plantuml/driver/common"
+)
 
 // CreateTableColumnsDefinitionSubState
 
@@ -17,26 +21,58 @@ type CreateTableColumnsDefinitionState struct {
 
 // GetTables implements MutableState.
 func (s *CreateTableColumnsDefinitionState) GetTables() *common.Tables {
-	panic("unimplemented")
+	// This substate doesn't own the full tables slice; return an empty placeholder.
+	empty := common.Tables{}
+	return &empty
 }
 
 func (s *CreateTableColumnsDefinitionState) InjectWord(word string) (MutableState, error) {
-	if s.Step == COLUMN_TYPE_STEP && (isSqlEquals(word, ComaWord) || isSqlEquals(word, CloseBracketWord)) {
+	if s.Step == COLUMN_TYPE_STEP {
+		// compute current parenthesis depth from the type built so far
+		preDepth := strings.Count(s.TmpColumn.Type, "(") - strings.Count(s.TmpColumn.Type, ")")
+		// handle parentheses and separators
+		if isSqlEquals(word, OpenBracketWord) {
+			s.TmpColumn.Type += word
+			return s, nil
+		}
+
 		if isSqlEquals(word, CloseBracketWord) {
+			if preDepth > 0 {
+				s.TmpColumn.Type += word
+				return s, nil
+			}
+			// closing the column list: finalize column and end substate
+			s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			return nil, nil
+		}
+
+		if isSqlEquals(word, ComaWord) {
+			if preDepth > 0 {
+				// comma inside type args
+				s.TmpColumn.Type += word
+				return s, nil
+			}
+			// top-level comma: finalize column and prepare for next
+			s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			s.Step = COLUMN_NAME_STEP
+			return s, nil
+		}
+
+		// general token -> append with sensible spacing (no space after '(')
+		if s.TmpColumn.Type == "" {
+			s.TmpColumn.Type = word
+		} else if strings.HasSuffix(s.TmpColumn.Type, "(") {
+			s.TmpColumn.Type += word
+		} else {
 			s.TmpColumn.Type += word
 		}
-		s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
-		return nil, nil
+
+		return s, nil
 	}
 
 	if s.Step == COLUMN_NAME_STEP {
 		s.TmpColumn.Name = word
 		s.Step = COLUMN_TYPE_STEP
-		return s, nil
-	}
-
-	if s.Step == COLUMN_TYPE_STEP && !isSqlEquals(word, ComaWord) {
-		s.TmpColumn.Type += word
 		return s, nil
 	}
 
@@ -69,8 +105,12 @@ func (s *CreateTableState) InjectWord(word string) (MutableState, error) {
 		s.SubState = subState
 	}
 
-	// CREATE <...> TABLE
+	// CREATE <...> TABLE or other CREATE statements
 	if isSqlEquals(s.LastWord, CreateWord) && !isSqlEquals(word, TableWord) {
+		// If it's a CREATE INDEX (or other unsupported CREATE), skip until semicolon
+		if isSqlEquals(word, IndexWord) {
+			return &SkipState{Tables: s.Tables}, nil
+		}
 		return s, UnexpectedWordError{UnexpectedWord: word, PreviousWord: s.LastWord}
 	}
 
