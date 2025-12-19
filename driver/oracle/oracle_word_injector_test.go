@@ -117,6 +117,7 @@ func TestCreateTableColumnsDefinitionSubState_ColumnDefinition(t *testing.T) {
 		assert.Nil(t, err)
 	}
 
-	assert.Equal(t, "id", state.TmpColumn.Name)
-	assert.Equal(t, "varchar(255)", state.TmpColumn.Type)
+	assert.Equal(t, 1, len(table.Columns))
+	assert.Equal(t, "id", table.Columns[0].Name)
+	assert.Equal(t, "varchar(255)", table.Columns[0].Type)
 }

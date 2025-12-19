@@ -29,7 +29,7 @@ func (s *CreateTableColumnsDefinitionState) GetTables() *common.Tables {
 func (s *CreateTableColumnsDefinitionState) InjectWord(word string) (MutableState, error) {
 	if s.Step == COLUMN_TYPE_STEP {
 		// compute current parenthesis depth from the type built so far
-		preDepth := strings.Count(s.TmpColumn.Type, "(") - strings.Count(s.TmpColumn.Type, ")")
+		preDepth := strings.Count(s.TmpColumn.Type, OpenBracketWord) - strings.Count(s.TmpColumn.Type, CloseBracketWord)
 		// handle parentheses and separators
 		if isSqlEquals(word, OpenBracketWord) {
 			s.TmpColumn.Type += word
@@ -54,17 +54,20 @@ func (s *CreateTableColumnsDefinitionState) InjectWord(word string) (MutableStat
 			}
 			// top-level comma: finalize column and prepare for next
 			s.Table.Columns = append(s.Table.Columns, s.TmpColumn)
+			s.TmpColumn = common.Column{} // Reset for next column
 			s.Step = COLUMN_NAME_STEP
 			return s, nil
 		}
 
-		// general token -> append with sensible spacing (no space after '(')
+		// general token -> append with sensible spacing
 		if s.TmpColumn.Type == "" {
 			s.TmpColumn.Type = word
-		} else if strings.HasSuffix(s.TmpColumn.Type, "(") {
+		} else if strings.HasSuffix(s.TmpColumn.Type, OpenBracketWord) {
+			s.TmpColumn.Type += word
+		} else if strings.ContainsAny(word, "0123456789().,") {
 			s.TmpColumn.Type += word
 		} else {
-			s.TmpColumn.Type += word
+			s.TmpColumn.Type += " " + word
 		}
 
 		return s, nil

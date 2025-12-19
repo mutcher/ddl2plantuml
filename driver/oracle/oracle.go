@@ -53,7 +53,30 @@ func isSqlEquals(command string, expected string) bool {
 func (m *Oracle) Parse(ddl string) (common.Tables, error) {
 	sqlHandler := new(SqlStateHandlerImpl)
 	sqlHandler.Reset()
-	return m.ParseEx(ddl, sqlHandler)
+	tables, err := m.ParseEx(ddl, sqlHandler)
+	if err != nil {
+		return nil, err
+	}
+
+	// deduplicate columns by name per table, preserve order
+	for ti := range tables {
+		seen := make(map[string]bool)
+		filtered := make([]common.Column, 0, len(tables[ti].Columns))
+		for _, c := range tables[ti].Columns {
+			name := c.Name
+			if name == "" {
+				continue
+			}
+			if _, ok := seen[name]; ok {
+				continue
+			}
+			seen[name] = true
+			filtered = append(filtered, c)
+		}
+		tables[ti].Columns = filtered
+	}
+
+	return tables, nil
 }
 
 func (m *Oracle) ParseEx(ddl string, sqlHandler SqlStateHandler) (common.Tables, error) {

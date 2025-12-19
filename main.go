@@ -110,6 +110,26 @@ type tmplData struct {
 }
 
 func (t tmplData) generate(tpl *template.Template, outputFile string) error {
+	// deduplicate columns per table (defensive, ensure no duplicate names)
+	for i := range t.Tables {
+		seen := make(map[string]bool)
+		cols := t.Tables[i].Columns
+		filtered := make([]common.Column, 0, len(cols))
+		for _, c := range cols {
+			name := strings.TrimSpace(c.Name)
+			if name == "" {
+				continue
+			}
+			if _, ok := seen[name]; ok {
+				continue
+			}
+			seen[name] = true
+			c.Name = name
+			filtered = append(filtered, c)
+		}
+		t.Tables[i].Columns = filtered
+	}
+
 	dir := path.Dir(outputFile)
 	if !exists(dir) {
 		err := mkDir(dir)
